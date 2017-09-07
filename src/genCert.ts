@@ -1,4 +1,4 @@
-import * as Canvas from "canvas";
+import { registerFont, createCanvas, loadImage } from 'canvas';
 import * as fs from "fs";
 import * as Koa from "koa";
 import * as moment from "moment";
@@ -79,29 +79,17 @@ const prettyPrintValidDate = (ts: number) => {
 };
 
 async function renderCertificate(profile: IProfile) {
-    const Image = Canvas.Image;
-    const Font = Canvas.Font;
-    const canvas = new Canvas(1920, 1357);
+    registerFont(path.join(__dirname, "assets", "EdwardianScriptITC.ttf"), {family: "Edwardian Script ITC"});
+    registerFont(path.join(__dirname, "assets", "Arial-BoldMT.ttf"), {family: "Arial", weight: "bold"});
+    registerFont(path.join(__dirname, "assets", "Arial-ItalicMT.ttf"), {family: "Arial", style: "italic"});
+    const canvas = createCanvas(1920, 1357);
     const context = canvas.getContext("2d");
-    // const r = Math.floor((Math.random() * 256));
-    // const g = Math.floor((Math.random() * 256));
-    // const b = Math.floor((Math.random() * 256));
-    // const color = "rgb(" + r + ", " + g + ", " + b + ")";
-
-    const edwardian = new Font("edwardian", path.join(__dirname, "assets", "ITCEDSCR.ttf"));
-    const arialItalic = new Font("arial-italic", path.join(__dirname, "assets", "Arial Italic.ttf"));
-    const arialBold = new Font("arial-bold", path.join(__dirname, "assets", "Arial Bold.ttf"));
 
     const p2 = path.join(__dirname, "assets", "Diplom.png");
-    const imageData = await readFilePromise(p2);
-
-    const img = new Canvas.Image();
-    img.src = imageData;
-
+    const img = await loadImage(p2);
     context.drawImage(img, 0, 0, 1920, 1357);
 
-    context.addFont(edwardian);
-    context.font = "64 edwardian";
+    context.font = "normal normal 64px EdwardianScriptITC";
     context.textAlign = "center";
     context.fillStyle = "#888";
     context.fillText(profile.name, 960, 155);
@@ -112,14 +100,12 @@ async function renderCertificate(profile: IProfile) {
     const obtainedDate = prettyPrintCertDate(profile.certDate);
     const obtainedString = `${profile.name} has obtained the Safe Delivery App certification on ${obtainedDate}`;
 
-    context.addFont(arialBold);
-    context.font = "21 arial-bold";
+    context.font = "normal bold 21px Arial";
     context.textAlign = "center";
     context.fillStyle = "#000";
     context.fillText(obtainedString, 960, 330);
 
-    context.addFont(arialItalic);
-    context.font = "21 arial-italic";
+    context.font = "italic normal 21px Arial";
     context.textAlign = "center";
     context.fillStyle = "#000";
     context.fillText(line1, 960, 380);
@@ -127,7 +113,7 @@ async function renderCertificate(profile: IProfile) {
     context.fillText(line3, 960, 450);
 
     const validToDate = prettyPrintValidDate(profile.certDate);
-    context.font = "21 arial-bold";
+    context.font = "normal bold 21px Arial";
     context.textAlign = "center";
     context.fillStyle = "#000";
     context.fillText("This Certificate is viable until " + validToDate, 960, 890);
