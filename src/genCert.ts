@@ -1,4 +1,4 @@
-import { registerFont, createCanvas, loadImage } from 'canvas';
+import { createCanvas, loadImage, registerFont } from "canvas";
 import * as fs from "fs";
 import * as Koa from "koa";
 import * as moment from "moment";
