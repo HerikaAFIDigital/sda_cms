@@ -52,9 +52,9 @@ interface IProfile {
     workPlace: string;
 }
 
-const line1 = "This certificate is granted for successful completion of the certification test and the Safe Delivery App Learning Platform. The certification test has been developed to";
-const line2 = "resemble real life clinical situations and is a case-based test consisting of 15 different cases.";
-const line3 = "This certification is a proof of proficient knowledge on the 7 BEmONC Signal Functions as the content is provided by the Safe Delivery App.";
+const line1 = "The certification test has been developed to resemble real life clinical situations and is a comprehensive case-based test.";
+const line2 = "This certificate is granted for successful completion of the certification test in the Safe Delivery App.";
+const line3 = "This certification is a proof of proficient knowledge on the 7 Basic Emergency Obstetric and Neonatal care Signal Functions.";
 
 const readFilePromise = (file: string) => {
     return new Promise((resolve, reject) => {
@@ -98,7 +98,7 @@ async function renderCertificate(profile: IProfile) {
     context.fillText(profile.jobTitle, 1430, 246);
 
     const obtainedDate = prettyPrintCertDate(profile.certDate);
-    const obtainedString = `${profile.name} has obtained the Safe Delivery App certification on ${obtainedDate}.`;
+    const obtainedString = `${profile.name} has obtained the Safe Delivery certificate on ${obtainedDate}.`;
 
     context.font = "normal bold 21px Arial";
     context.textAlign = "center";
@@ -117,7 +117,7 @@ async function renderCertificate(profile: IProfile) {
     context.textAlign = "center";
     context.fillStyle = "#000";
     context.fillText(`This certificate is viable until ${validToDate}.`, 960, 890);
-    context.fillText("The certification is granted by Maternity Foundation, Copenhagen University and University of South Denmark.", 960, 950);
+    context.fillText("The certification is granted by Maternity Foundation, Copenhagen University and University of Southern Denmark.", 960, 950);
     // context.fillText("In collaboration with", 960, 1010);
 
     return canvas.toBuffer();
