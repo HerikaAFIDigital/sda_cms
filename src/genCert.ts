@@ -80,7 +80,7 @@ const prettyPrintValidDate = (ts: number) => {
 
 async function renderCertificate(profile: IProfile) {
     // registerFont(path.join(__dirname, "assets", "EdwardianScriptITC.ttf"), {family: "Edwardian Script ITC"});
-    registerFont(path.join(__dirname, "assets", "FanwoodText-Italic.ttf"), {family: "Fanwood Text"});
+    registerFont(path.join(__dirname, "assets", "FanwoodText-Italic.ttf"), {family: "Fanwood Text", style: "italic"});
     registerFont(path.join(__dirname, "assets", "Arial-BoldMT.ttf"), {family: "Arial", weight: "bold"});
     registerFont(path.join(__dirname, "assets", "Arial-ItalicMT.ttf"), {family: "Arial", style: "italic"});
     const canvas = createCanvas(1920, 1357);
@@ -90,7 +90,7 @@ async function renderCertificate(profile: IProfile) {
     const img = await loadImage(p2);
     context.drawImage(img, 0, 0, 1920, 1357);
 
-    context.font = "normal normal 64px FanwoodText-Italic";
+    context.font = "italic normal 64px 'Fanwood Text'";
     context.textAlign = "center";
     context.fillStyle = "#333";
     context.fillText(profile.name, 960, 155);
