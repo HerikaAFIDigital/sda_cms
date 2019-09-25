@@ -21,6 +21,7 @@ const routes: IRoutes = {
 };
 
 const router = async (ctx: Koa.Context, next: (() => Promise<any>)) => {
+    
     const url = URL.parse(ctx.request.url, true);
     const handler = url.pathname ? routes[url.pathname] : undefined;
     if (handler) {

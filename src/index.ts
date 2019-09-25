@@ -2,12 +2,16 @@ import * as Koa from "koa";
 import Config from "./config";
 import { logger } from "./logger";
 import router from "./router";
+import * as koaBody from "koa-body";
 
 const port = process.env.PORT || 3010;
 const app = new Koa();
 
+
+// body
+app.use(koaBody());
+
 // Check for correct header
-// Add logger
 app.use(async (ctx, next) => {
   if (!("x-sda-auth" in ctx.header) || ctx.header["x-sda-auth"] !== Config.apiKey) {
     ctx.status = 403;
