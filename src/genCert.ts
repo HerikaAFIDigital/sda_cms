@@ -106,20 +106,20 @@ const prettyPrintValidDate = (ts: number) => {
 
 async function renderCertificate(profile: IProfile) {
 
-    console.log("Rudi - inde i renderCertificate på cert-service");
-
     let { jobTitle, name, certHeader, certBody, certBody1, certBody2, certDates, language } = profile;
 
-    console.log("Rudi - inde i renderCertificate på cert-service er header nu: ", certHeader);
-    console.log("Rudi - inde i renderCertificate på cert-service er body nu: ", certBody);
-    console.log("Rudi - inde i renderCertificate på cert-service er body1 nu: ", certBody1);
-    console.log("Rudi - inde i renderCertificate på cert-service er body2 nu: ", certBody2);
-    console.log("Rudi - inde i renderCertificate på cert-service er language nu: ", language);
+    // console.log("cert-service -> header: ", certHeader);
+    // console.log("cert-service -> body: ", certBody);
+    // console.log("cert-service -> body1: ", certBody1);
+    // console.log("cert-service -> body2: ", certBody2);
+    // console.log("cert-service -> language: ", language);
 
-    // console.log("Rudi - inde i renderCertificate på cert-service er test nu: ", "সেফ ডেলিভারি অ্যাপে সার্টিফিকেশন পরীক্ষা");
-    const _certDates = certDates; //Make new local version of the certDates array
-    _certDates.slice(Math.max(_certDates.length - 5, 1)); //Get the latest 5 entries
-    const prettyPrintedDates = _certDates.map((date, index) => { //Map though and prettyPrint the dates
+    //Make new local version of the certDates array
+    const _certDates = certDates;
+    //Get the latest 5 entries
+    _certDates.slice(Math.max(_certDates.length - 5, 1));
+    //Map though and prettyPrint the dates
+    const prettyPrintedDates = _certDates.map((date, index) => {
         return (
             prettyPrintCertDate(date)
         )
@@ -138,11 +138,13 @@ async function renderCertificate(profile: IProfile) {
     // registerFont(path.join(__dirname, "assets", "Arial-ItalicMT.ttf"), { family: "Arial", style: "italic" });
     // registerFont(path.join(__dirname, "assets", "Ubuntu-Light.ttf"), { family: "Ubuntu Light", style: "normal" });
 
-    const canvas = createCanvas(1920, 1357); //Set the dimentions for the canvas
+    //Set the dimentions for the canvas
+    const canvas = createCanvas(1920, 1357);
     const context = canvas.getContext("2d");
     // context.fillStyle = 'white'; //Make the background of the canvas white
     // context.fillRect(0, 0, 1920, 1357); //Make the background of the canvas white and fill the whole canvas
 
+    //Due to specific landuages, there has to be set a font for that specific language in order to show the text correct on the certificate
     switch (language) {
         case "Bangladesh - Bangla":
             registerFont(path.join(__dirname, "assets", "NotoSansBengali-Light.ttf"), { family: "NotoSansBengali-Light", style: "normal" });
