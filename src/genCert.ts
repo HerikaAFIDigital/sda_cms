@@ -58,20 +58,13 @@ export const handleGeneration = async (ctx: Koa.Context, url: Url) => {
         return;
     }
 
+    const { jobTitle, name, certHeader, certBody, certBody1, certBody2, certDates, language, uniqueId, country } = ctx.request.body;
+
     ctx.type = "png";
-    ctx.body = await renderCertificate({
-        jobTitle: ctx.request.body.jobTitle,
-        name: ctx.request.body.name,
-        certHeader: ctx.request.body.certHeader,
-        certBody: ctx.request.body.certBody,
-        certBody1: ctx.request.body.certBody1,
-        certBody2: ctx.request.body.certBody2,
-        certDates: ctx.request.body.certDates,
-        language: ctx.request.body.language
-    });
+    ctx.body = await renderCertificate({ jobTitle, name, certHeader, certBody, certBody1, certBody2, certDates, language, uniqueId, country });
 };
 
-interface IProfile {
+interface ICertData {
     jobTitle: string;
     name: string;
     certHeader: string;
@@ -80,6 +73,8 @@ interface IProfile {
     certBody2: string;
     certDates: [];
     language: string;
+    uniqueId?: string;
+    country?: string;
 }
 
 // const readFilePromise = (file: string) => {
@@ -104,9 +99,9 @@ const prettyPrintValidDate = (ts: number) => {
     return m.format("Do MMMM YYYY");
 };
 
-async function renderCertificate(profile: IProfile) {
+async function renderCertificate(profile: ICertData) {
 
-    let { jobTitle, name, certHeader, certBody, certBody1, certBody2, certDates, language } = profile;
+    let { jobTitle, name, certHeader, certBody, certBody1, certBody2, certDates, language, uniqueId, country } = profile;
 
     // console.log("cert-service -> header: ", certHeader);
     // console.log("cert-service -> body: ", certBody);
@@ -198,6 +193,10 @@ async function renderCertificate(profile: IProfile) {
     { date_3 === undefined ? null : context.fillText(date_3, 1525, 620) };
     { date_4 === undefined ? null : context.fillText(date_4, 1525, 717) };
     { date_5 === undefined ? null : context.fillText(date_5, 1525, 814) };
+
+    if (uniqueId !== undefined && uniqueId.trim() !== "") {
+        context.fillText(`ID#: ${uniqueId}`, 170, 1230);
+    }
 
     return canvas.toBuffer();
 }

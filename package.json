@@ -12,10 +12,14 @@
   "dependencies": {
     "@types/koa": "^2.0.39",
     "@types/winston": "^2.3.5",
-    "canvas": "^2.0.0-alpha.5",
+    "canvas": "~2.6.1",
     "koa": "^2.8.1",
     "koa-body": "^4.1.1",
     "moment": "^2.18.1",
     "winston": "^2.3.1"
+  },
+  "devDependencies": {
+    "typescript": "^4.0.0",
+    "nodemon": "^2.0.6"
   }
 }
