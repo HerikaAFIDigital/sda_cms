@@ -1,10 +1,12 @@
 import { createCanvas, loadImage, registerFont } from "canvas";
 import * as fs from "fs";
+import * as util from "util";
 import * as Koa from "koa";
 import * as moment from "moment";
 import * as path from "path";
 import { Url } from "url";
-import { logger } from "./logger";
+
+const stat = util.promisify(fs.stat);
 
 const missingParameter = (ctx: Koa.Context, url: Url) => {
 
@@ -77,17 +79,24 @@ interface ICertData {
     country?: string;
 }
 
-// const readFilePromise = (file: string) => {
-//     return new Promise((resolve, reject) => {
-//         fs.readFile(file, (err, data) => {
-//             if (!err) {
-//                 resolve(data);
-//             } else {
-//                 reject(err);
-//             }
-//         });
-//     });
-// };
+async function getBaseFile(country: string | undefined): Promise<string> {
+    if (typeof country !== "string" || country.trim().length !== 2) {
+        return "New_certificate.png";
+    }
+
+    const tryThisFile = `New_certificate_${country.toUpperCase()}.png`;
+    const tryThisPath = path.join(__dirname, "assets/templates", tryThisFile);
+    try {
+        const fileStat = await stat(tryThisPath);
+        if (fileStat.isFile()) {
+            return tryThisFile;
+        }
+    } catch (e) {
+        return "New_certificate.png";
+    }
+
+    return "New_certificate.png";
+}
 
 const prettyPrintCertDate = (ts: number) => {
     const m = moment(ts);
@@ -127,39 +136,35 @@ async function renderCertificate(profile: ICertData) {
     const date_4 = prettyPrintedDates[3];
     const date_5 = prettyPrintedDates[4];
 
-    // registerFont(path.join(__dirname, "assets", "EdwardianScriptITC.ttf"), {family: "Edwardian Script ITC"});
-    // registerFont(path.join(__dirname, "assets", "FanwoodText-Italic.ttf"), { family: "Fanwood Text", style: "italic" });
-    // registerFont(path.join(__dirname, "assets", "Arial-BoldMT.ttf"), { family: "Arial", weight: "bold" });
-    // registerFont(path.join(__dirname, "assets", "Arial-ItalicMT.ttf"), { family: "Arial", style: "italic" });
-    // registerFont(path.join(__dirname, "assets", "Ubuntu-Light.ttf"), { family: "Ubuntu Light", style: "normal" });
-
     //Set the dimentions for the canvas
     const canvas = createCanvas(1920, 1357);
     const context = canvas.getContext("2d");
+
     // context.fillStyle = 'white'; //Make the background of the canvas white
     // context.fillRect(0, 0, 1920, 1357); //Make the background of the canvas white and fill the whole canvas
 
     //Due to specific landuages, there has to be set a font for that specific language in order to show the text correct on the certificate
     switch (language) {
         case "Bangladesh - Bangla":
-            registerFont(path.join(__dirname, "assets", "NotoSansBengali-Light.ttf"), { family: "NotoSansBengali-Light", style: "normal" });
+            registerFont(path.join(__dirname, "assets/fonts", "NotoSansBengali-Light.ttf"), { family: "NotoSansBengali-Light", style: "normal" });
             context.font = "normal normal 40px NotoSansBengali-Light"; //Use the custom font 'Chiret-Regular' for Amharic text's
             break;
         case "Ethiopia - Amharic":
-            registerFont(path.join(__dirname, "assets", "NotoSansEthiopic-Light.ttf"), { family: "NotoSansEthiopic-Light", style: "normal" });
+            registerFont(path.join(__dirname, "assets/fonts", "NotoSansEthiopic-Light.ttf"), { family: "NotoSansEthiopic-Light", style: "normal" });
             context.font = "normal normal 30px NotoSansEthiopic-Light"; //Use the custom font 'Chiret-Regular' for Amharic text's
             break;
         case "India - Hindi":
-            registerFont(path.join(__dirname, "assets", "NotoSansDevanagari-Light.ttf"), { family: "NotoSansDevanagari-Light", style: "normal" });
+            registerFont(path.join(__dirname, "assets/fonts", "NotoSansDevanagari-Light.ttf"), { family: "NotoSansDevanagari-Light", style: "normal" });
             context.font = "normal normal 30px NotoSansDevanagari-Light"; //Use the custom font 'Chiret-Regular' for Amharic text's
             break;
         default:
-            registerFont(path.join(__dirname, "assets", "NotoSans-Light.ttf"), { family: "NotoSans-Light", style: "normal" });
+            registerFont(path.join(__dirname, "assets/fonts", "NotoSans-Light.ttf"), { family: "NotoSans-Light", style: "normal" });
             context.font = "normal normal 30px NotoSans-Light"; //Use the custom font 'Chiret-Regular' for Amharic text's
             break;
     }
 
-    const p2 = path.join(__dirname, "assets", "New_certificate.png");
+    const basePng = await getBaseFile(country);
+    const p2 = path.join(__dirname, "assets/templates", basePng);
     const img = await loadImage(p2);
     context.drawImage(img, 0, 0, 1920, 1357);
 
