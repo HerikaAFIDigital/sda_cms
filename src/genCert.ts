@@ -195,7 +195,13 @@ async function renderCertificate(profile: ICertData) {
     { date_5 === undefined ? null : context.fillText(date_5, 1525, 814) };
 
     if (uniqueId !== undefined && uniqueId.trim() !== "") {
-        context.fillText(`ID#: ${uniqueId}`, 170, 1230);
+        context.save();
+        context.font = "normal normal 20px 'monospace'";
+        context.translate(1815, 678);
+        context.rotate(-Math.PI/2);
+        context.textAlign = "center";
+        context.fillText(`ID: ${uniqueId}`, 0, 0);
+        context.restore();
     }
 
     return canvas.toBuffer();
