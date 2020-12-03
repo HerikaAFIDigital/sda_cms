@@ -60,10 +60,10 @@ export const handleGeneration = async (ctx: Koa.Context, url: Url) => {
         return;
     }
 
-    const { jobTitle, name, certHeader, certBody, certBody1, certBody2, certDates, language, uniqueId, country } = ctx.request.body;
+    const { jobTitle, name, certHeader, certBody, certBody1, certBody2, certDates, language, uniqueId, memberId, country } = ctx.request.body;
 
     ctx.type = "png";
-    ctx.body = await renderCertificate({ jobTitle, name, certHeader, certBody, certBody1, certBody2, certDates, language, uniqueId, country });
+    ctx.body = await renderCertificate({ jobTitle, name, certHeader, certBody, certBody1, certBody2, certDates, language, uniqueId, memberId, country });
 };
 
 interface ICertData {
@@ -76,6 +76,7 @@ interface ICertData {
     certDates: [];
     language: string;
     uniqueId?: string;
+    memberId?: string;
     country?: string;
 }
 
@@ -108,9 +109,13 @@ const prettyPrintValidDate = (ts: number) => {
     return m.format("Do MMMM YYYY");
 };
 
+function nonEmptyString(s: any): s is string {
+    return s !== undefined && s !== null && typeof s === "string" && s.trim() !== "";
+}
+
 async function renderCertificate(profile: ICertData) {
 
-    let { jobTitle, name, certHeader, certBody, certBody1, certBody2, certDates, language, uniqueId, country } = profile;
+    let { jobTitle, name, certHeader, certBody, certBody1, certBody2, certDates, language, uniqueId, memberId, country } = profile;
 
     // console.log("cert-service -> header: ", certHeader);
     // console.log("cert-service -> body: ", certBody);
@@ -199,13 +204,25 @@ async function renderCertificate(profile: ICertData) {
     { date_4 === undefined ? null : context.fillText(date_4, 1525, 717) };
     { date_5 === undefined ? null : context.fillText(date_5, 1525, 814) };
 
-    if (uniqueId !== undefined && uniqueId.trim() !== "") {
+    let idString = "";
+    if (nonEmptyString(uniqueId) && nonEmptyString(memberId)) {
+        // Print both
+        idString = `Certificate ID: ${uniqueId}      Membership ID: ${memberId}`;
+    } else if (nonEmptyString(uniqueId)) {
+        // Print only certificate id
+        idString = `Certificate ID: ${uniqueId}`;
+    } else if (nonEmptyString(memberId)) {
+        // Print only member id
+        idString = `Membership ID: ${memberId}`;
+    }
+
+    if (idString.trim() !== "") {
         context.save();
         context.font = "normal normal 20px 'monospace'";
         context.translate(1815, 678);
         context.rotate(-Math.PI/2);
         context.textAlign = "center";
-        context.fillText(`ID: ${uniqueId}`, 0, 0);
+        context.fillText(idString, 0, 0);
         context.restore();
     }
 

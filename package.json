@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
     "build": "tsc",
+    "postbuild": "rm -rf dist/assets && cp -r assets dist/ && cp package.json dist/",
     "dev": "tsc --watch & NODE_ENV=dev nodemon dist",
     "test": "echo \"Error: no test specified\" && exit 1",
     "lint": "tslint -c ./tslint.json './src/**/*.ts*'"
