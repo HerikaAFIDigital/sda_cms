@@ -191,6 +191,9 @@ async function renderCertificate(profile: ICertData) {
     //First number is horizontal, and second number is vertical. Starting from the top left corner!
     context.fillText(jobTitle, 435, 485);
     context.fillText(name, 980, 485);
+    if (nonEmptyString(memberId)) {
+        context.fillText(memberId, 710, 406);
+    }
     context.fillText(certHeader, 710, 355);
     context.fillText(certBody, 710, 570);
     context.fillText(certBody1, 710, 610);
@@ -204,25 +207,13 @@ async function renderCertificate(profile: ICertData) {
     { date_4 === undefined ? null : context.fillText(date_4, 1525, 717) };
     { date_5 === undefined ? null : context.fillText(date_5, 1525, 814) };
 
-    let idString = "";
-    if (nonEmptyString(uniqueId) && nonEmptyString(memberId)) {
-        // Print both
-        idString = `Certificate ID: ${uniqueId}      Membership ID: ${memberId}`;
-    } else if (nonEmptyString(uniqueId)) {
-        // Print only certificate id
-        idString = `Certificate ID: ${uniqueId}`;
-    } else if (nonEmptyString(memberId)) {
-        // Print only member id
-        idString = `Membership ID: ${memberId}`;
-    }
-
-    if (idString.trim() !== "") {
+    if (nonEmptyString(uniqueId)) {
         context.save();
         context.font = "normal normal 20px 'monospace'";
         context.translate(1815, 678);
         context.rotate(-Math.PI/2);
         context.textAlign = "center";
-        context.fillText(idString, 0, 0);
+        context.fillText(`ID: ${uniqueId}`, 0, 0);
         context.restore();
     }
 
