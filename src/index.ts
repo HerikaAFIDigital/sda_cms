@@ -7,18 +7,19 @@ import * as koaBody from "koa-body";
 const port = process.env.PORT || 3010;
 const app = new Koa();
 
-
 // body
 app.use(koaBody());
 
 // Check for correct header
 app.use(async (ctx, next) => {
-  if (!("x-sda-auth" in ctx.header) || ctx.header["x-sda-auth"] !== Config.apiKey) {
+  if (
+    !("x-sda-auth" in ctx.header) ||
+    ctx.header["x-sda-auth"] !== Config.apiKey
+  ) {
     ctx.status = 403;
     ctx.body = "No thank";
     return;
   }
-
   await next();
 });
 
@@ -32,6 +33,4 @@ app.use(async (ctx, next) => {
 
 app.use(router);
 
-app.listen(port, () => {
-  return logger.info(`server is listening on ${port}`);
-});
+app.listen(port, () => logger.info(`server is listening on ${port}`));

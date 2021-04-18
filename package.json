@@ -4,7 +4,7 @@
   "version": "0.1.0",
   "main": "index.js",
   "scripts": {
-    "build": "tsc",
+    "build": "tsc && npm run postbuild",
     "postbuild": "rm -rf dist/assets && cp -r assets dist/ && cp package.json dist/",
     "dev": "tsc --watch & NODE_ENV=dev nodemon dist",
     "test": "echo \"Error: no test specified\" && exit 1",
@@ -20,7 +20,7 @@
     "winston": "^2.3.1"
   },
   "devDependencies": {
-    "typescript": "^4.0.0",
-    "nodemon": "^2.0.6"
+    "nodemon": "^2.0.6",
+    "typescript": "^4.0.0"
   }
 }
