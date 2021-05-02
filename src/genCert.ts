@@ -8,9 +8,16 @@ import { missingParameter } from "./utils";
 import { prettyPrintCertDate, nonEmptyString } from "./helper";
 import { ICertData } from "./interfaces";
 
+/***  
+    The fs.stat() method is used to return information about the given file or directory.
+    It returns an fs.Stat object which has several properties and methods to get details about the file or directory.
+***/
 const stat = util.promisify(fs.stat);
 
+// Handler function for generating a CHAMPION Certificate using the parameters received in the POST request
+
 export const handleGeneration = async (ctx: Koa.Context, url: Url) => {
+  // Check for missing parameters
   if (missingParameter(ctx, url)) {
     return;
   }
@@ -85,7 +92,6 @@ async function renderCertificate(profile: ICertData) {
 
   //Make new local version of the certDates array
   const _certDates = certDates;
-
   //Get the latest 5 entries
   _certDates.slice(Math.max(_certDates.length - 5, 1));
 
@@ -93,7 +99,6 @@ async function renderCertificate(profile: ICertData) {
   const prettyPrintedDates = _certDates.map((date) =>
     prettyPrintCertDate(date)
   );
-
   //Fill the 5 dates with the formatted dates
   const date_1 = prettyPrintedDates[0];
   const date_2 = prettyPrintedDates[1];
