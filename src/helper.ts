@@ -4,9 +4,7 @@ export const prettyPrintCertDate = (ts: number) =>
   moment(ts).format("DD.MM.YYYY");
 
 export function nonEmptyString(s: any): s is string {
-  return (
-    s !== undefined && s !== null && typeof s === "string" && s.trim() !== ""
-  );
+  return s && s !== null && typeof s === "string" && s.trim() !== "";
 }
 
 const prettyPrintValidDate = (ts: number) =>

@@ -156,27 +156,27 @@ async function renderCertificate(profile: ICertData) {
 
   // There will be a unfliied or a filled star to the side of the dates
   {
-    date_1 === undefined
+    !date_1
       ? context.drawImage(img_unfiledStar, 1360, 380, 70, 70)
       : context.drawImage(img_filedStar, 1360, 380, 70, 70);
   }
   {
-    date_2 === undefined
+    !date_2
       ? context.drawImage(img_unfiledStar, 1360, 475, 70, 70)
       : context.drawImage(img_filedStar, 1360, 475, 70, 70);
   }
   {
-    date_3 === undefined
+    !date_3
       ? context.drawImage(img_unfiledStar, 1360, 575, 70, 70)
       : context.drawImage(img_filedStar, 1360, 575, 70, 70);
   }
   {
-    date_4 === undefined
+    !date_4
       ? context.drawImage(img_unfiledStar, 1360, 670, 70, 70)
       : context.drawImage(img_filedStar, 1360, 670, 70, 70);
   }
   {
-    date_5 === undefined
+    !date_5
       ? context.drawImage(img_unfiledStar, 1360, 770, 70, 70)
       : context.drawImage(img_filedStar, 1360, 770, 70, 70);
   }
