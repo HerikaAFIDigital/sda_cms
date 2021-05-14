@@ -1,3 +1,5 @@
+// Creating an interface for the certificate fields.
+
 export interface ICertData {
   jobTitle: string;
   name: string;

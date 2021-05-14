@@ -11,13 +11,12 @@
     "lint": "tslint -c ./tslint.json './src/**/*.ts*'"
   },
   "dependencies": {
-    "@types/koa": "^2.0.39",
-    "@types/winston": "^2.3.5",
-    "canvas": "~2.6.1",
-    "koa": "^2.8.1",
+    "@types/koa": "^2.13.1",
+    "canvas": "~2.7.0",
+    "koa": "^2.13.1",
     "koa-body": "^4.1.1",
     "moment": "^2.18.1",
-    "winston": "^2.3.1"
+    "winston": "^3.3.3"
   },
   "devDependencies": {
     "nodemon": "^2.0.6",

@@ -10,6 +10,7 @@ const app = new Koa();
 // body
 app.use(koaBody());
 
+// Middleware to check for Authorization
 // Check for correct header
 app.use(async (ctx, next) => {
   if (
@@ -23,6 +24,9 @@ app.use(async (ctx, next) => {
   await next();
 });
 
+// Middleware to add a logger
+// Logger Format
+// "HTTP_METHOD URL RESPONSE_CODE TIME"
 // Add logger
 app.use(async (ctx, next) => {
   const start = Date.now();
@@ -31,6 +35,7 @@ app.use(async (ctx, next) => {
   logger.info(`${ctx.method} ${ctx.url} - ${ctx.status} - ${ms} ms`);
 });
 
+// Middleware to add routes
 app.use(router);
 
 app.listen(port, () => logger.info(`server is listening on ${port}`));

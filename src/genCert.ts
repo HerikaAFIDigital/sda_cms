@@ -37,6 +37,7 @@ export const handleGeneration = async (ctx: Koa.Context, url: Url) => {
   } = ctx.request.body;
 
   ctx.type = "png";
+
   ctx.body = await renderCertificate({
     jobTitle,
     name,
@@ -52,22 +53,29 @@ export const handleGeneration = async (ctx: Koa.Context, url: Url) => {
   });
 };
 
+// Function to get the base image file for the certificate from the assests folder
+
 async function getBaseFile(country: string | undefined): Promise<string> {
+  // Check if the country is not s tring or if its length is not equal to 2
   if (typeof country !== "string" || country.trim().length !== 2) {
     return "New_certificate.png";
   }
   const tryThisFile = `New_certificate_${country.toUpperCase()}.png`;
   const tryThisPath = path.join(__dirname, "assets/templates", tryThisFile);
   try {
+    // Return the specific country certificate presennt int the path folder
     const fileStat = await stat(tryThisPath);
     if (fileStat.isFile()) {
       return tryThisFile;
     }
   } catch (e) {
+    // If any exception is caught, return the normal certificate file.
     return "New_certificate.png";
   }
   return "New_certificate.png";
 }
+
+// Function to create a certificate in a specific language
 
 async function renderCertificate(profile: ICertData) {
   let {
@@ -90,30 +98,30 @@ async function renderCertificate(profile: ICertData) {
   // console.log("cert-service -> body2: ", certBody2);
   // console.log("cert-service -> language: ", language);
 
-  //Make new local version of the certDates array
+  // Make new local version of the certDates array
   const _certDates = certDates;
-  //Get the latest 5 entries
+  // Get the latest 5 entries
   _certDates.slice(Math.max(_certDates.length - 5, 1));
 
-  //Map though and prettyPrint the dates
+  // Map though and prettyPrint the dates
   const prettyPrintedDates = _certDates.map((date) =>
     prettyPrintCertDate(date)
   );
-  //Fill the 5 dates with the formatted dates
+  // Fill the 5 dates with the formatted dates
   const date_1 = prettyPrintedDates[0];
   const date_2 = prettyPrintedDates[1];
   const date_3 = prettyPrintedDates[2];
   const date_4 = prettyPrintedDates[3];
   const date_5 = prettyPrintedDates[4];
 
-  //Set the dimentions for the canvas
+  // Set the dimentions for the canvas
   const canvas = createCanvas(1920, 1357);
   const context = canvas.getContext("2d");
 
   // context.fillStyle = 'white'; //Make the background of the canvas white
   // context.fillRect(0, 0, 1920, 1357); //Make the background of the canvas white and fill the whole canvas
 
-  //Due to specific landuages, there has to be set a font for that specific language in order to show the text correct on the certificate
+  // Due to specific landuages, there has to be set a font for that specific language in order to show the text correct on the certificate
   switch (language) {
     case "Bangladesh - Bangla":
       registerFont(
@@ -145,6 +153,7 @@ async function renderCertificate(profile: ICertData) {
       break;
   }
 
+  // Getting the base image for creating the certificate
   const basePng = await getBaseFile(country);
   const p2 = path.join(__dirname, "assets/templates", basePng);
   const img = await loadImage(p2);
