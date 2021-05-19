@@ -26,6 +26,34 @@ Service that generates a CHAMPIAN certificate.
 
 ---
 
+### File Wise Description
+
+1. **config.ts** - Contains key value pair information about external services such as URL, connection strings etc that this service may communicate with.
+
+   - apiKey - Key used to authenticate requests made to this service.
+
+2. **canvas.d.ts** - Declares the canvas module.
+
+3. **genCert.ts** - Contains functions which are responsible for creating the certificates.
+
+   - handleGeneration - Checking for any missing parameters.
+   - renderCertificate - Function which creates the certificate based upon the input parameters by the user.
+   - getBaseFile - Function to choose the base image file for the certificate.
+
+4. **helper.ts**
+
+   - prettyPrintCertDate - Returns the date in the "DD.MM.YYYY" Format.
+   - nonEmptyString - Check if the input is an empty string or it is null or anything other than a string.
+   - prettyPrintValidDate - Returns the date in the valid "Do MMMM YYYY" Format.
+
+5. **utils.ts** - Contains function to check for missing parameters.
+
+   - missingParameter - Checks if there are many missing parameters in the request by the user.
+
+6. **interfaces.ts** - Creating an interface for the certificate fields.
+
+---
+
 ## API Endpoints
 
 1. /cert
