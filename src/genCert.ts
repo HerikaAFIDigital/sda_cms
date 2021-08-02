@@ -144,6 +144,14 @@ async function renderCertificate(profile: ICertData) {
       );
       context.font = "normal normal 30px NotoSansDevanagari-Light"; //Use the custom font 'Chiret-Regular' for Amharic text's
       break;
+    case "Cambodia":
+      console.log("Registering langauge for combodia");
+      registerFont(path.join(__dirname, "assets/fonts", "Khmer-Regular.ttf"), {
+        family: "Khmer-Regular",
+        style: "normal",
+      });
+      context.font = "normal normal 30px Khmer-Regular";
+      break;
     default:
       registerFont(path.join(__dirname, "assets/fonts", "NotoSans-Light.ttf"), {
         family: "NotoSans-Light",
