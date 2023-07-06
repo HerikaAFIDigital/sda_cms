@@ -1,18 +1,12 @@
-import { createCanvas, loadImage, registerFont } from "canvas";
-import * as fs from "fs";
-import * as util from "util";
-import * as Koa from "koa";
-import * as path from "path";
-import { Url } from "url";
-import { missingParameter } from "./utils";
-import { prettyPrintCertDate, nonEmptyString } from "./helper";
-import { ICertData } from "./interfaces";
-
-/***  
-    The fs.stat() method is used to return information about the given file or directory.
-    It returns an fs.Stat object which has several properties and methods to get details about the file or directory.
-***/
-const stat = util.promisify(fs.stat);
+import { createCanvas, loadImage, registerFont } from 'canvas';
+import * as fs from 'fs';
+import * as Koa from 'koa';
+import * as path from 'path';
+import { Url } from 'url';
+import { missingParameter } from './utils';
+import { prettyPrintCertDate, nonEmptyString } from './helper';
+import { ICertData } from './interfaces';
+import { logger } from './logger';
 
 // Handler function for generating a CHAMPION Certificate using the parameters received in the POST request
 
@@ -22,57 +16,52 @@ export const handleGeneration = async (ctx: Koa.Context, url: Url) => {
     return;
   }
 
-  const {
-    jobTitle,
-    name,
-    certHeader,
-    certBody,
-    certBody1,
-    certBody2,
-    certDates,
-    language,
-    uniqueId,
-    memberId,
-    country,
-  } = ctx.request.body;
+  ctx.type = 'png';
 
-  ctx.type = "png";
-
-  ctx.body = await renderCertificate({
-    jobTitle,
-    name,
-    certHeader,
-    certBody,
-    certBody1,
-    certBody2,
-    certDates,
-    language,
-    uniqueId,
-    memberId,
-    country,
-  });
+  ctx.body = await renderCertificate(ctx.request.body);
 };
 
 // Function to get the base image file for the certificate from the assests folder
 
-async function getBaseFile(country: string | undefined): Promise<string> {
+async function getBaseFile(
+  country: string | undefined,
+  isModuleCertificate: boolean = false
+): Promise<string> {
   // Check if the country is not s tring or if its length is not equal to 2
-  if (typeof country !== "string" || country.trim().length !== 2) {
-    return "New_certificate.png";
+
+  const defaultCert = 'New_certificate.png';
+  const defaultModuleCert = 'New_certificate_module.png';
+
+  const defaultRetval =
+    isModuleCertificate === true ? defaultModuleCert : defaultCert;
+
+  if (typeof country !== 'string' || country.trim().length !== 2) {
+    logger.warn('Invalid country value, returning default');
+    return defaultRetval;
   }
-  const tryThisFile = `New_certificate_${country.toUpperCase()}.png`;
-  const tryThisPath = path.join(__dirname, "assets/templates", tryThisFile);
-  try {
-    // Return the specific country certificate presennt int the path folder
-    const fileStat = await stat(tryThisPath);
-    if (fileStat.isFile()) {
-      return tryThisFile;
-    }
-  } catch (e) {
-    // If any exception is caught, return the normal certificate file.
-    return "New_certificate.png";
+
+  const championCert = `New_certificate_${country.toUpperCase()}.png`;
+  const moduleCert = `New_certificate_${country.toUpperCase()}${
+    isModuleCertificate ? '_module' : ''
+  }.png`;
+  const championCertPath = path.join(
+    __dirname,
+    'assets/templates',
+    championCert
+  );
+  const moduleCertPath = path.join(__dirname, 'assets/templates', moduleCert);
+
+  if (isModuleCertificate) {
+    return fs.existsSync(moduleCertPath) === true
+      ? moduleCert
+      : defaultModuleCert;
   }
-  return "New_certificate.png";
+
+  if (fs.existsSync(championCertPath)) {
+    return fs.existsSync(moduleCertPath) === true ? championCert : defaultCert;
+  }
+
+  return defaultRetval;
 }
 
 // Function to create a certificate in a specific language
@@ -89,8 +78,11 @@ async function renderCertificate(profile: ICertData) {
     language,
     uniqueId,
     memberId,
-    country,
+    country
   } = profile;
+
+  const isModuleCertificate =
+    certBody1 && certBody1.includes('module') ? true : false;
 
   // console.log("cert-service -> header: ", certHeader);
   // console.log("cert-service -> body: ", certBody);
@@ -116,63 +108,62 @@ async function renderCertificate(profile: ICertData) {
 
   // Set the dimentions for the canvas
   const canvas = createCanvas(1920, 1357);
-  const context = canvas.getContext("2d");
+  const context = canvas.getContext('2d');
 
   // context.fillStyle = 'white'; //Make the background of the canvas white
   // context.fillRect(0, 0, 1920, 1357); //Make the background of the canvas white and fill the whole canvas
 
   // Due to specific landuages, there has to be set a font for that specific language in order to show the text correct on the certificate
   switch (language) {
-    case "Bangladesh - Bangla":
+    case 'Bangladesh - Bangla':
       registerFont(
-        path.join(__dirname, "assets/fonts", "NotoSansBengali-Light.ttf"),
-        { family: "NotoSansBengali-Light", style: "normal" }
+        path.join(__dirname, 'assets/fonts', 'NotoSansBengali-Light.ttf'),
+        { family: 'NotoSansBengali-Light', style: 'normal' }
       );
-      context.font = "normal normal 40px NotoSansBengali-Light"; //Use the custom font 'Chiret-Regular' for Amharic text's
+      context.font = 'normal normal 40px NotoSansBengali-Light'; //Use the custom font 'Chiret-Regular' for Amharic text's
       break;
-    case "Ethiopia - Amharic":
+    case 'Ethiopia - Amharic':
       registerFont(
-        path.join(__dirname, "assets/fonts", "NotoSansEthiopic-Light.ttf"),
-        { family: "NotoSansEthiopic-Light", style: "normal" }
+        path.join(__dirname, 'assets/fonts', 'NotoSansEthiopic-Light.ttf'),
+        { family: 'NotoSansEthiopic-Light', style: 'normal' }
       );
-      context.font = "normal normal 30px NotoSansEthiopic-Light"; //Use the custom font 'Chiret-Regular' for Amharic text's
+      context.font = 'normal normal 30px NotoSansEthiopic-Light'; //Use the custom font 'Chiret-Regular' for Amharic text's
       break;
-    case "India - Hindi":
+    case 'India - Hindi':
       registerFont(
-        path.join(__dirname, "assets/fonts", "NotoSansDevanagari-Light.ttf"),
-        { family: "NotoSansDevanagari-Light", style: "normal" }
+        path.join(__dirname, 'assets/fonts', 'NotoSansDevanagari-Light.ttf'),
+        { family: 'NotoSansDevanagari-Light', style: 'normal' }
       );
-      context.font = "normal normal 30px NotoSansDevanagari-Light"; //Use the custom font 'Chiret-Regular' for Amharic text's
+      context.font = 'normal normal 30px NotoSansDevanagari-Light'; //Use the custom font 'Chiret-Regular' for Amharic text's
       break;
-    case "Cambodia":
-      console.log("Registering langauge for combodia");
-      registerFont(path.join(__dirname, "assets/fonts", "Khmer-Regular.ttf"), {
-        family: "Khmer-Regular",
-        style: "normal",
+    case 'Cambodia':
+      registerFont(path.join(__dirname, 'assets/fonts', 'Khmer-Regular.ttf'), {
+        family: 'Khmer-Regular',
+        style: 'normal'
       });
-      context.font = "normal normal 30px Khmer-Regular";
+      context.font = 'normal normal 30px Khmer-Regular';
       break;
-    default:
-      registerFont(path.join(__dirname, "assets/fonts", "NotoSans-Light.ttf"), {
-        family: "NotoSans-Light",
-        style: "normal",
+    default: //Use the custom font 'Chiret-Regular' for Amharic text's
+      registerFont(path.join(__dirname, 'assets/fonts', 'NotoSans-Light.ttf'), {
+        family: 'NotoSans-Light',
+        style: 'normal'
       });
-      context.font = "normal normal 30px NotoSans-Light"; //Use the custom font 'Chiret-Regular' for Amharic text's
+      context.font = 'normal normal 30px NotoSans-Light';
       break;
   }
 
   // Getting the base image for creating the certificate
-  const basePng = await getBaseFile(country);
-  const p2 = path.join(__dirname, "assets/templates", basePng);
+  const basePng = await getBaseFile(country, isModuleCertificate);
+  const p2 = path.join(__dirname, 'assets/templates', basePng);
   const img = await loadImage(p2);
   context.drawImage(img, 0, 0, 1920, 1357);
 
   const unfilledStar = path.join(
     __dirname,
-    "assets",
-    "stjerne_gennemsigtig.png"
+    'assets',
+    'stjerne_gennemsigtig.png'
   );
-  const filledStar = path.join(__dirname, "assets", "stjerne_gul.png");
+  const filledStar = path.join(__dirname, 'assets', 'stjerne_gul.png');
   const img_unfiledStar = await loadImage(unfilledStar);
   const img_filedStar = await loadImage(filledStar);
 
@@ -203,8 +194,8 @@ async function renderCertificate(profile: ICertData) {
       : context.drawImage(img_filedStar, 1360, 770, 70, 70);
   }
 
-  context.textAlign = "center"; //Alignment - ie. left, right, center, start, end
-  context.fillStyle = "#333"; //Color
+  context.textAlign = 'center'; //Alignment - ie. left, right, center, start, end
+  context.fillStyle = '#333'; //Color
 
   //First number is horizontal, and second number is vertical. Starting from the top left corner!
   context.fillText(jobTitle, 435, 485);
@@ -238,7 +229,7 @@ async function renderCertificate(profile: ICertData) {
     context.font = "normal normal 20px 'monospace'";
     context.translate(1815, 678);
     context.rotate(-Math.PI / 2);
-    context.textAlign = "center";
+    context.textAlign = 'center';
     context.fillText(`ID: ${uniqueId}`, 0, 0);
     context.restore();
   }
