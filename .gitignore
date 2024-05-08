@@ -10,4 +10,6 @@ doc/jsdoc
 tools/prettyPrintContent/output/
 tools/prettyPrintContent/*.zip
 table-events.csv
+~$*.xlsx
+
 

@@ -3,6 +3,13 @@
 import { list, update, insert, remove, find } from './drugs.model';
 import { generatePDF } from './pdfGenerator'; 
 import { generateExcel } from './excelGenerator'; 
+// import PDFReader from 'pdfreader';
+import fs from 'fs';
+import pdfjs from 'pdfjs-dist';
+import { importDrugsFromPDF } from './drugs.model';
+import { getDocument } from 'pdfjs-dist'; // Import getDocument function from pdfjs-dist
+
+
 
 export const index = async (ctx, next) => {
   const langId = ctx.query.langId;
@@ -69,5 +76,101 @@ export const generateExcelController = async (ctx, next) => {
     ctx.status = 500;
     ctx.body = { error: 'Failed to generate Excel' };
   }
+  await next();
+};
+
+
+
+
+
+
+// export const importDrugsFromPDFController = async (ctx, next) => {
+//     const pdfPath = 'sample1.pdf';
+//     const data = new Uint8Array(fs.readFileSync(pdfPath));
+
+//     try {
+//         const pdf = await pdfjs.getDocument(data).promise;
+//         const numPages = pdf.numPages;
+//         let text = '';
+
+//         // Extract text from each page
+//         for (let i = 1; i <= numPages; i++) {
+//             const page = await pdf.getPage(i);
+//             const content = await page.getTextContent();
+//             content.items.forEach(item => {
+//                 text += item.str + ' ';
+//             });
+//             // Output text for each page (optional)
+//             console.log(`Text on page ${i}:`, text);
+//         }
+
+//         // Output entire text (optional)
+//         console.log('Extracted text:', text);
+        
+//         // Respond with success message
+//         ctx.status = 200;
+//         ctx.body = { message: 'PDF imported successfully' };
+//     } catch (error) {
+//         // Handle errors
+//         console.error('Error importing PDF:', error);
+//         ctx.status = 500;
+//         ctx.body = { error: 'Failed to import PDF' };
+//     }
+
+//     await next();
+// };
+
+
+
+function generateUniqueKey(name) {
+  
+  return name.replace(/\s+/g, '-').toLowerCase();
+}
+
+
+export const importDrugsFromPDFController = async (ctx, next) => {
+  const pdfPath = 'sample1.pdf';
+  const data = new Uint8Array(fs.readFileSync(pdfPath));
+
+  try {
+      const pdf = await getDocument(data).promise;
+      const numPages = pdf.numPages;
+
+      for (let i = 1; i <= numPages; i++) {
+          const page = await pdf.getPage(i);
+          const content = await page.getTextContent();
+
+          
+          for (const item of content.items) {
+              const medicineName = item.str;
+              const medicineDescription = item.str; 
+              const medicineLangId = ''; 
+
+              
+              const medicineKey = generateUniqueKey(medicineName);
+
+              
+              try {
+                  const newMedicine = {
+                      key: medicineKey, 
+                      name: medicineName,
+                      description: medicineDescription,
+                      langId: medicineLangId
+                  };
+                  await insert(ctx.userId, newMedicine); 
+              } catch (error) {
+                  console.error(`Error inserting medicine "${medicineName}" on page ${i}:`, error);
+              }
+          }
+      }
+
+      ctx.status = 200;
+      ctx.body = { message: 'PDF imported successfully' };
+  } catch (error) {
+      console.error('Error importing PDF:', error);
+      ctx.status = 500;
+      ctx.body = { error: 'Failed to import PDF' };
+  }
+
   await next();
 };
