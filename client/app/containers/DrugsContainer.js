@@ -9,6 +9,8 @@ import Input from "react-toolbox/lib/input";
 import Snackbar from "react-toolbox/lib/snackbar";
 import { PUSH } from "redux-little-router";
 
+
+
 import {
   List,
   ListItem,
@@ -120,6 +122,59 @@ class DrugsContainer extends Component {
     { label: "Save", onClick: this.saveDrug },
   ];
 
+  handleExport = () => {
+    // Make a request to the backend API endpoint
+    fetch("http://localhost:9000/api/drugs/pdf")
+      .then((response) => {
+        // Handle success response from the backend if needed
+        console.log("Export successful", response);
+      })
+      .catch((error) => {
+        // Handle error response from the backend if needed
+        console.error("Export failed", error);
+      });
+  };
+
+  // handleExport = () => {
+  //   // Make a request to the backend API endpoint
+  //   fetch("http://localhost:9000/api/drugs/pdf")
+  //     .then((response) => {
+  //       if (!response.ok) {
+  //         throw new Error("Export request failed");
+  //       }
+  //       // Check if response is empty
+  //       if (response.status === 204) {
+  //         throw new Error("No data to export");
+  //       }
+  //       // Parse the filename from Content-Disposition header if available
+  //       let filename = 'list_of_drugs.pdf';
+  //       const disposition = response.headers.get('Content-Disposition');
+  //       if (disposition && disposition.indexOf('attachment') !== -1) {
+  //         const filenameRegex = /filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/;
+  //         const matches = filenameRegex.exec(disposition);
+  //         if (matches && matches[1]) {
+  //           filename = matches[1].replace(/['"]/g, '');
+  //         }
+  //       }
+  //       // Trigger file download
+  //       response.blob().then((blob) => {
+  //         const url = window.URL.createObjectURL(new Blob([blob]));
+  //         const link = document.createElement('a');
+  //         link.href = url;
+  //         link.setAttribute('download', filename);
+  //         document.body.appendChild(link);
+  //         link.click();
+  //         link.parentNode.removeChild(link);
+  //       });
+  //     })
+  //     .catch((error) => {
+  //       // Handle error response from the backend
+  //       console.error("Export failed", error);
+  //       alert("Export failed: " + error.message);
+  //     });
+  // };
+  
+
   render() {
     const push = (l) => this.props.push(this.props.currentPathname, l);
 
@@ -133,6 +188,21 @@ class DrugsContainer extends Component {
         {this.state.drugs.length == 0 && !this.isMaster() && (
           <p>Please create Drugs in master</p>
         )}
+
+        
+      {/* Export button */}
+      {this.props.langId === "" && (
+        <div style={{ position: 'relative' }}>
+          <Button
+            label="Export"
+            icon="file_download"
+            raised
+            primary
+            onClick={this.handleExport}
+            style={{ position: 'absolute', top: '-60px', right: '20px' }}
+          />
+        </div>
+      )}
 
         <List selectable>
           <ListSubHeader caption="Drugs" />

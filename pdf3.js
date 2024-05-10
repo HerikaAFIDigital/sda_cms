@@ -2,7 +2,7 @@ const fs = require('fs');
 const PDFDocument = require('pdfkit');
 
 const medicines = [
-    'Dolo650',
+    'Paracetamol500',
     // 'Aspirin',
     // 'Ibuprofen',
     // Add more medicines as needed

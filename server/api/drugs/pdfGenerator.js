@@ -8,7 +8,7 @@ export function generatePDF(drugsData) {
 
 
   const doc = new PDFDocument();
-  const stream = doc.pipe(fs.createWriteStream('drugs_list.pdf'));
+  const stream = doc.pipe(fs.createWriteStream('list_of_drugs.pdf'));
 
   doc.fontSize(20).text('List of Drugs', { align: 'center' });
   doc.moveDown();
