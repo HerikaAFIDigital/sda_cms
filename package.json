@@ -47,7 +47,8 @@
     "request": "^2.88.2",
     "streamifier": "^0.1.1",
     "uuid": "^8.3.2",
-    "winston": "^2.3.0"
+    "winston": "^2.3.0",
+    "xlsx": "^0.18.5"
   },
   "devDependencies": {
     "assets-webpack-plugin": "^3.4.0",

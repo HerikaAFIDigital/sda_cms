@@ -6,6 +6,8 @@ import { generateExcel } from './excelGeneratorforActincard';
 import pdfjs from 'pdfjs-dist';
 import { getDocument } from 'pdfjs-dist'; 
 import fs from 'fs';
+const ExcelJS = require('exceljs');
+
 
 
 
@@ -149,6 +151,54 @@ export const importActioncardFromPDFController = async (ctx, next) => {
       console.error('Error importing PDF:', error);
       ctx.status = 500;
       ctx.body = { error: 'Failed to import PDF' };
+  }
+
+  await next();
+};
+
+
+
+
+export const importActioncardFromExcelController = async (ctx, next) => {
+  const excelPath = 'actioncard2.xls.xlsx'; 
+
+  try {
+    const workbook = new ExcelJS.Workbook();
+    await workbook.xlsx.readFile(excelPath);
+    const worksheet = workbook.getWorksheet(1); 
+
+    worksheet.eachRow(async (row, rowNumber) => {
+      // if (rowNumber === 1) return;
+      
+      const actioncardName = row.getCell(1).value; 
+      const actioncardDescription = row.getCell(1).value; 
+      const actioncardLangId = ''; 
+
+      const actioncardKey = generateUniqueKey(actioncardName);
+
+      try {
+        const newActioncard = {
+          key: actioncardKey,
+          name: actioncardName,
+          description: actioncardDescription,
+          langId: actioncardLangId
+        };
+        // await insert(ctx.userId, newActioncard); 
+        await actionCardsModel.insert(ctx.userId, newActioncard);
+        console.log("hellooo");
+        
+
+      } catch (error) {
+        console.error(`Error inserting actioncard "${actioncardName}":`, error);
+      }
+    });
+
+    ctx.status = 200;
+    ctx.body = { message: 'Excel imported successfully' };
+  } catch (error) {
+    console.error('Error importing Excel:', error);
+    ctx.status = 500;
+    ctx.body = { error: 'Failed to import Excel' };
   }
 
   await next();
