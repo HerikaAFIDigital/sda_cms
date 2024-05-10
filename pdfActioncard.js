@@ -1,22 +1,21 @@
 const fs = require('fs');
 const PDFDocument = require('pdfkit');
 
-const medicines = [
-    'Dolo650',
-    // 'Aspirin',
-    // 'Ibuprofen',
-    // Add more medicines as needed
+const actioncards = [
+    'action card 3',
+    
+    
 ];
 
 const doc = new PDFDocument();
-const outputPath = 'sample1.pdf';
+const outputPath = 'actioncard.pdf';
 
 const stream = fs.createWriteStream(outputPath);
 doc.pipe(stream);
 
-medicines.forEach((medicine) => {
+actioncards.forEach((actioncard) => {
     
-    doc.fontSize(20).text(medicine, { align: 'center' });
+    doc.fontSize(20).text(actioncard, { align: 'center' });
     doc.moveDown(0.5);
 });
 

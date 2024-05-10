@@ -3,9 +3,9 @@ import PDFDocument from 'pdfkit';
 import fs from 'fs';
 import ExcelJS from 'exceljs'; 
 
-export function generateExcel(drugsData) {
+export function generateExcel(actioncardData) {
   const workbook = new ExcelJS.Workbook();
-  const worksheet = workbook.addWorksheet('Drugs');
+  const worksheet = workbook.addWorksheet('Actioncard');
 
   
   worksheet.columns = [
@@ -14,12 +14,12 @@ export function generateExcel(drugsData) {
   ];
 
   
-  drugsData.forEach((drug, index) => {
-    worksheet.addRow({ index: index + 1, description: drug.description });
+  actioncardData.forEach((actioncard, index) => {
+    worksheet.addRow({ index: index + 1, description: actioncard.description });
   });
 
   
-  workbook.xlsx.writeFile('drugs_listt.xlsx').then(() => {
+  workbook.xlsx.writeFile('actioncard_listt.xlsx').then(() => {
     console.log('Excel file generated successfully');
   });
 }

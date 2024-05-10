@@ -3,11 +3,10 @@
 import { list, update, insert, remove, find } from './drugs.model';
 import { generatePDF } from './pdfGenerator'; 
 import { generateExcel } from './excelGenerator'; 
-// import PDFReader from 'pdfreader';
 import fs from 'fs';
 import pdfjs from 'pdfjs-dist';
 import { importDrugsFromPDF } from './drugs.model';
-import { getDocument } from 'pdfjs-dist'; // Import getDocument function from pdfjs-dist
+import { getDocument } from 'pdfjs-dist'; 
 
 
 
