@@ -9,6 +9,8 @@ export function generatePDF(actioncardData) {
 
   const doc = new PDFDocument();
   const stream = doc.pipe(fs.createWriteStream('actioncard_list.pdf'));
+  doc.font('Helvetica');
+
 
   doc.fontSize(20).text('List of Actioncards', { align: 'center' });
   doc.moveDown();

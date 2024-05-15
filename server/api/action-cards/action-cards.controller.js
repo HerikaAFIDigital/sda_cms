@@ -7,11 +7,7 @@ import pdfjs from 'pdfjs-dist';
 import { getDocument } from 'pdfjs-dist'; 
 import fs from 'fs';
 const ExcelJS = require('exceljs');
-
-
-
-
-
+import PDFDocument from 'pdfkit';
 
 
 export const index = async (ctx, next) => {
@@ -91,15 +87,7 @@ function generateUniqueKey(name) {
 }
 
 
-// import fs from 'fs';
-// import { getDocument } from 'pdfjs-dist';
 
-// Assuming generateUniqueKey and insert functions are defined elsewhere in your code
-// Adjust the functions as per your implementation
-
-// const fs = require('fs');
-// const { getDocument } = require('pdfjs-dist');
-// const { insert } = require('./your-insert-function'); // Import your insert function from your module
 
 function generateUniqueKey(name) {
   
@@ -203,3 +191,62 @@ export const importActioncardFromExcelController = async (ctx, next) => {
 
   await next();
 };
+
+
+
+export const generatePDFwithTranslatedData = async (ctx, next) => {
+  const doc = new PDFDocument();
+  const filename = 'actioncard_with_adapted_and_translated_data.pdf';
+  const filePath = `${filename}`;
+  const stream = fs.createWriteStream(filePath);
+  doc.pipe(stream);
+
+
+  try {
+    const data = await actionCardsModel.list(ctx.query.langId, ctx.role, ctx.role === 'admin' && ctx.query.showAll === 'true');
+    doc.fontSize(20).text(`Actioncard Details of LangId: ${ctx.query.langId}`, { align: 'center' }).moveDown();
+
+    data.forEach(chapter => {
+      doc.fontSize(16).text(`Description: ${chapter.description}`).moveDown();
+      chapter.chapters.forEach(chapter => {
+        doc.fontSize(14).text(`Chapter Key: ${chapter.key}`).moveDown();
+        chapter.cards.forEach(card => {
+          doc.fontSize(12).text(`Card ID: ${card.id}`).moveDown();
+          
+          
+          if (card.content && card.content.blocks && card.content.blocks.length > 0) {
+            doc.text(`Content: ${card.content.blocks[0].text}`).moveDown();
+          }
+          
+          doc.text(`Type: ${card.type}`).moveDown();
+          
+          
+          if (card.adapted && card.adapted.blocks && card.adapted.blocks.length > 0) {
+            doc.text(`Adapted: ${card.adapted.blocks[0].text}`).moveDown();
+            // console.log(`Adapted: ${card.adapted.blocks[0].text}`)
+          }
+          
+          
+          if (card.translated && card.translated.blocks && card.translated.blocks.length > 0) {
+            doc.text(`Translated: ${card.translated.blocks[0].text}`).moveDown();
+            // console.log(`Translated: ${card.translated.blocks[0].text}`);
+          }
+        });
+      });
+    });
+
+    doc.end();
+
+    ctx.status = 200;
+    ctx.body = { success: true, filePath};
+  } catch (error) {
+    console.error('Error retrieving data from the database:', error);
+    ctx.status = 500;
+    ctx.body = { success: false, error: 'Internal server error' };
+  }
+
+  await next();
+};
+
+
+

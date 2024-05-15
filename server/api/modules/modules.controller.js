@@ -49,7 +49,7 @@ export const del = async (ctx, next) => {
 export const generatePDFController = async (ctx, next) => {
   
   const doc = new PDFDocument();
-  const filename = 'modulewise_data.pdf';
+  const filename = 'modulewise_data1.pdf';
   const filePath = `${filename}`; 
 
   
@@ -57,14 +57,15 @@ export const generatePDFController = async (ctx, next) => {
   doc.pipe(stream);
 
   
-  doc.fontSize(20).text('Module-wise Data', { align: 'center' }).moveDown();
 
   const langId = ctx.query.langId;
 
   let modulesData = await list(langId, ctx.role);
    ctx.status = 200;
    ctx.body = modulesData;
-   console.log(modulesData)
+  //  console.log(modulesData)
+  doc.fontSize(20).text(`Modulewise Data of LagId : ${ctx.query.langId}`, { align: 'center' }).moveDown();
+
 
 
 modulesData.forEach(module => {
@@ -72,7 +73,7 @@ modulesData.forEach(module => {
   doc.fontSize(16).text(`Module: ${module.description}`);
   doc.text(`Icon: ${module.icon}`);
   doc.text(`Module Key: ${module.key}`);
-  doc.text(`lanId: ${module.langId}`);
+  
   
   
   if (module.actionCards.length > 0) {
@@ -142,17 +143,3 @@ modulesData.forEach(module => {
   await next();
 };
 
-const getModuleWiseData = async (langId) => {
-  try {
-    
-    const modulesData = await find({ langId: langId });
-    console.log("hello");
-    console.log(modulesData)
-
-    return modulesData; 
-  } catch (error) {
-    
-    console.error('Error fetching module-wise data:', error);
-    throw error; 
-  }
-};
