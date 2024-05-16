@@ -8,6 +8,8 @@ import { getDocument } from 'pdfjs-dist';
 import fs from 'fs';
 const ExcelJS = require('exceljs');
 import PDFDocument from 'pdfkit';
+import { parse } from 'node-html-parser';
+
 
 
 export const index = async (ctx, next) => {
@@ -196,15 +198,31 @@ export const importActioncardFromExcelController = async (ctx, next) => {
 
 export const generatePDFwithTranslatedData = async (ctx, next) => {
   const doc = new PDFDocument();
-  const filename = 'actioncard_with_adapted_and_translated_data.pdf';
+  const filename = 'actioncard_with_adapted_and_translated_data2.pdf';
   const filePath = `${filename}`;
   const stream = fs.createWriteStream(filePath);
   doc.pipe(stream);
 
-
   try {
     const data = await actionCardsModel.list(ctx.query.langId, ctx.role, ctx.role === 'admin' && ctx.query.showAll === 'true');
     doc.fontSize(20).text(`Actioncard Details of LangId: ${ctx.query.langId}`, { align: 'center' }).moveDown();
+
+    const renderTableToPDF = (doc, htmlContent) => {
+      const root = parse(htmlContent); 
+      const tables = root.querySelectorAll('table'); 
+
+      tables.forEach(table => {
+        const rows = table.querySelectorAll('tr'); 
+        rows.forEach(row => {
+          const columns = row.querySelectorAll('td, th'); 
+          columns.forEach((column, index) => {
+            
+            doc.text(column.text.trim(), { continued: index !== 0 }); 
+          });
+          doc.moveDown(); 
+        });
+      });
+    };
 
     data.forEach(chapter => {
       doc.fontSize(16).text(`Description: ${chapter.description}`).moveDown();
@@ -212,24 +230,31 @@ export const generatePDFwithTranslatedData = async (ctx, next) => {
         doc.fontSize(14).text(`Chapter Key: ${chapter.key}`).moveDown();
         chapter.cards.forEach(card => {
           doc.fontSize(12).text(`Card ID: ${card.id}`).moveDown();
-          
-          
-          if (card.content && card.content.blocks && card.content.blocks.length > 0) {
-            doc.text(`Content: ${card.content.blocks[0].text}`).moveDown();
-          }
-          
-          doc.text(`Type: ${card.type}`).moveDown();
-          
-          
-          if (card.adapted && card.adapted.blocks && card.adapted.blocks.length > 0) {
-            doc.text(`Adapted: ${card.adapted.blocks[0].text}`).moveDown();
-            // console.log(`Adapted: ${card.adapted.blocks[0].text}`)
-          }
-          
-          
-          if (card.translated && card.translated.blocks && card.translated.blocks.length > 0) {
-            doc.text(`Translated: ${card.translated.blocks[0].text}`).moveDown();
-            // console.log(`Translated: ${card.translated.blocks[0].text}`);
+
+          if (card.type === "table") {
+            if (card.content && card.content.html) {
+              renderTableToPDF(doc, card.content.html); 
+            }
+          } else {
+            if (card.content && card.content.blocks && card.content.blocks.length > 0) {
+              card.content.blocks.forEach(block => {
+                doc.text(`Content: ${block.text}`).moveDown();
+              });
+            }
+
+            doc.text(`Type: ${card.type}`).moveDown();
+
+            if (card.adapted && card.adapted.blocks && card.adapted.blocks.length > 0) {
+              card.adapted.blocks.forEach(block => {
+                doc.text(`Adapted: ${block.text}`).moveDown();
+              });
+            }
+
+            if (card.translated && card.translated.blocks && card.translated.blocks.length > 0) {
+              card.translated.blocks.forEach(block => {
+                doc.text(`Translated: ${block.text}`).moveDown();
+              });
+            }
           }
         });
       });
@@ -238,7 +263,7 @@ export const generatePDFwithTranslatedData = async (ctx, next) => {
     doc.end();
 
     ctx.status = 200;
-    ctx.body = { success: true, filePath};
+    ctx.body = { success: true, filePath };
   } catch (error) {
     console.error('Error retrieving data from the database:', error);
     ctx.status = 500;
