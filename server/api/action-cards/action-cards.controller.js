@@ -198,64 +198,63 @@ export const importActioncardFromExcelController = async (ctx, next) => {
 
 export const generatePDFwithTranslatedData = async (ctx, next) => {
   const doc = new PDFDocument();
-  const filename = 'actioncard_with_adapted_and_translated_data2.pdf';
+  const filename = 'actioncard_with_adapted_and_translated_data4.pdf';
   const filePath = `${filename}`;
   const stream = fs.createWriteStream(filePath);
   doc.pipe(stream);
 
   try {
+    const titleFont = 'Helvetica-Bold';
+    const contentFont = 'Helvetica';
+    const fontSizeTitle = 20;
+    const fontSizeSubtitle = 16;
+    const fontSizeText = 12;
+    const margin = 50;
+
     const data = await actionCardsModel.list(ctx.query.langId, ctx.role, ctx.role === 'admin' && ctx.query.showAll === 'true');
-    doc.fontSize(20).text(`Actioncard Details of LangId: ${ctx.query.langId}`, { align: 'center' }).moveDown();
+    doc.fontSize(fontSizeTitle).font(titleFont).text(`Actioncard Details of LangId: ${ctx.query.langId}`, { align: 'center' }).moveDown();
 
     const renderTableToPDF = (doc, htmlContent) => {
-      const root = parse(htmlContent); 
-      const tables = root.querySelectorAll('table'); 
+      const root = parse(htmlContent);
+      const tables = root.querySelectorAll('table');
 
       tables.forEach(table => {
-        const rows = table.querySelectorAll('tr'); 
+        const rows = table.querySelectorAll('tr');
         rows.forEach(row => {
-          const columns = row.querySelectorAll('td, th'); 
+          const columns = row.querySelectorAll('td, th');
           columns.forEach((column, index) => {
-            
-            doc.text(column.text.trim(), { continued: index !== 0 }); 
+            doc.text(column.text.trim(), { continued: index !== 0 });
           });
-          doc.moveDown(); 
+          doc.moveDown();
         });
       });
     };
 
     data.forEach(chapter => {
-      doc.fontSize(16).text(`Description: ${chapter.description}`).moveDown();
+      doc.fontSize(fontSizeSubtitle).font(titleFont).text(`Description: ${chapter.description}`).moveDown();
       chapter.chapters.forEach(chapter => {
-        doc.fontSize(14).text(`Chapter Key: ${chapter.key}`).moveDown();
+        doc.fontSize(fontSizeSubtitle).font(titleFont).text(`Chapter Key: ${chapter.key}`).moveDown();
         chapter.cards.forEach(card => {
-          doc.fontSize(12).text(`Card ID: ${card.id}`).moveDown();
+          doc.fontSize(fontSizeText).font(contentFont).text(`Card ID: ${card.id}`).moveDown();
 
           if (card.type === "table") {
             if (card.content && card.content.html) {
-              renderTableToPDF(doc, card.content.html); 
+              renderTableToPDF(doc, card.content.html);
             }
           } else {
             if (card.content && card.content.blocks && card.content.blocks.length > 0) {
-              card.content.blocks.forEach(block => {
-                doc.text(`Content: ${block.text}`).moveDown();
-              });
+              doc.fontSize(fontSizeText).font(contentFont).text(`Master: ${card.content.blocks.map(block => block.text).join('\n')}`).moveDown();
             }
-
-            doc.text(`Type: ${card.type}`).moveDown();
-
             if (card.adapted && card.adapted.blocks && card.adapted.blocks.length > 0) {
-              card.adapted.blocks.forEach(block => {
-                doc.text(`Adapted: ${block.text}`).moveDown();
-              });
+              doc.fontSize(fontSizeText).font(contentFont).text(`Adapted: ${card.adapted.blocks.map(block => block.text).join('\n')}`).moveDown();
             }
-
             if (card.translated && card.translated.blocks && card.translated.blocks.length > 0) {
-              card.translated.blocks.forEach(block => {
-                doc.text(`Translated: ${block.text}`).moveDown();
-              });
+              doc.fontSize(fontSizeText).font(contentFont).text(`Translated: ${card.translated.blocks.map(block => block.text).join('\n')}`).moveDown();
             }
           }
+
+          
+          doc.moveDown(2);
         });
       });
     });
@@ -272,6 +271,7 @@ export const generatePDFwithTranslatedData = async (ctx, next) => {
 
   await next();
 };
+
 
 
 
