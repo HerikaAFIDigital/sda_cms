@@ -196,22 +196,35 @@ export const importActioncardFromExcelController = async (ctx, next) => {
 
 
 
+
+
+
+
 export const generatePDFwithTranslatedData = async (ctx, next) => {
   const doc = new PDFDocument();
-  const filename = 'actioncard_with_adapted_and_translated_data4.pdf';
+  const filename = 'actioncard_with_adapted_and_translated_data5.pdf';
   const filePath = `${filename}`;
   const stream = fs.createWriteStream(filePath);
   doc.pipe(stream);
+  const hindiFontPath = 'NotoSansDevanagari\\static\\NotoSansDevanagari-Regular.ttf'; 
+  doc.registerFont('NotoSansDevanagari', hindiFontPath);
 
   try {
     const titleFont = 'Helvetica-Bold';
     const contentFont = 'Helvetica';
+    const hindifont = 'NotoSansDevanagari';
+    
+
     const fontSizeTitle = 20;
     const fontSizeSubtitle = 16;
     const fontSizeText = 12;
     const margin = 50;
 
     const data = await actionCardsModel.list(ctx.query.langId, ctx.role, ctx.role === 'admin' && ctx.query.showAll === 'true');
+    if (!data) {
+      throw new Error('No data retrieved from the list function');
+    }
+
     doc.fontSize(fontSizeTitle).font(titleFont).text(`Actioncard Details of LangId: ${ctx.query.langId}`, { align: 'center' }).moveDown();
 
     const renderTableToPDF = (doc, htmlContent) => {
@@ -231,29 +244,58 @@ export const generatePDFwithTranslatedData = async (ctx, next) => {
     };
 
     data.forEach(chapter => {
-      doc.fontSize(fontSizeSubtitle).font(titleFont).text(`Description: ${chapter.description}`).moveDown();
-      chapter.chapters.forEach(chapter => {
-        doc.fontSize(fontSizeSubtitle).font(titleFont).text(`Chapter Key: ${chapter.key}`).moveDown();
-        chapter.cards.forEach(card => {
-          doc.fontSize(fontSizeText).font(contentFont).text(`Card ID: ${card.id}`).moveDown();
+      if (!chapter) return;
+      doc.fontSize(fontSizeSubtitle).font(titleFont).text(`Description: ${chapter.description || ''}`).moveDown();
+      (chapter.chapters || []).forEach(chapter => {
+        if (!chapter) return;
+        doc.fontSize(fontSizeSubtitle).font(titleFont).text(`Chapter Key: ${chapter.key || ''}`).moveDown();
+        (chapter.cards || []).forEach(card => {
+          if (!card) return;
+          doc.fontSize(fontSizeText).font(contentFont).text(`Card ID: ${card.id || ''}`).moveDown();
 
           if (card.type === "table") {
             if (card.content && card.content.html) {
               renderTableToPDF(doc, card.content.html);
+            } else if (card.translated && card.translated.html) {
+              renderTableToPDF(doc, card.translated.html); // Render translated table
+            } else if (card.adapted && card.adapted.html) {
+              renderTableToPDF(doc, card.adapted.html); 
             }
           } else {
-            if (card.content && card.content.blocks && card.content.blocks.length > 0) {
-              doc.fontSize(fontSizeText).font(contentFont).text(`Master: ${card.content.blocks.map(block => block.text).join('\n')}`).moveDown();
+            const logBlockTexts = (label, blocks) => {
+              if (blocks && blocks.length > 0) {
+                const validBlocks = blocks.filter(block => block && block.text);
+                if (validBlocks.length > 0) {
+                  const text = validBlocks.map(block => block.text).join('\n');
+                  console.log(`Rendering ${label} Text:`, text);
+                  doc.fontSize(fontSizeText).font(contentFont).text(`${label}: ${text}`).moveDown();
+                }
+              }
+            };
+
+            if (card.content && card.content.blocks) {
+              logBlockTexts('Master', card.content.blocks);
             }
-            if (card.adapted && card.adapted.blocks && card.adapted.blocks.length > 0) {
-              doc.fontSize(fontSizeText).font(contentFont).text(`Adapted: ${card.adapted.blocks.map(block => block.text).join('\n')}`).moveDown();
+            if (card.adapted && card.adapted.blocks) {
+              logBlockTexts('Adapted', card.adapted.blocks);
             }
+
             if (card.translated && card.translated.blocks && card.translated.blocks.length > 0) {
-              doc.fontSize(fontSizeText).font(contentFont).text(`Translated: ${card.translated.blocks.map(block => block.text).join('\n')}`).moveDown();
+              const translatedBlocks = card.translated.blocks.filter(block => block && block.text);
+              if (translatedBlocks.length > 0) {
+                const translatedText = translatedBlocks.map(block => block.text).join('\n');
+                console.log('Rendering Translated Text:', translatedText);
+                try {
+                  doc.fontSize(fontSizeText).font(hindifont).text(`Translated: ${translatedText}`).moveDown();
+                } catch (err) {
+                  console.error('Error rendering translated text:', err);
+                }
+              }
+            } else {
+              console.log('Translated text missing for card ID:', card.id); 
             }
           }
 
-          
           doc.moveDown(2);
         });
       });
@@ -271,7 +313,6 @@ export const generatePDFwithTranslatedData = async (ctx, next) => {
 
   await next();
 };
-
 
 
 
