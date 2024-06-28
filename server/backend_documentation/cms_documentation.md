@@ -23,8 +23,7 @@ During the app download process, users are prompted to select their preferred ve
 
 
 
-<img src=".\Screenshot 2024-01-08 150713.png" alt="Example Image" style="width:600px;"/>
-
+c
 The following image shows all the contents of the master's version, with a list of modules.
 
 
